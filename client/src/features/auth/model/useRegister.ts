@@ -1,6 +1,6 @@
 import {useState} from "react";
-import type {FormErrors, RegisterFormData} from "../types/auth.types.ts";
-import {authApi} from "../../../api/authApi.ts";
+import type {FormErrors, RegisterFormData} from './auth.types';
+import {authApi} from '../api/authApi';
 
 export const useRegister = () => {
     const [formData, setFormData] = useState<RegisterFormData>({

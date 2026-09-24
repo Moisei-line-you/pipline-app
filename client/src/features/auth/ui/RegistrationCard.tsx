@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRegister } from '../hooks/useRegister';
+import { useRegister } from '../model/useRegister';
 import './RegistrationCard.css';
 
 interface RegisterCardProps {
