@@ -1,4 +1,4 @@
-import {useFileProcessor} from "../hooks/useFileProcessor.ts";
+import {useFileProcessor} from '../model/useFileProcessor';
 import './FileProcessorCard.css';
 
 interface FileProcessorCardProps {

@@ -17,7 +17,7 @@
 //     },
 // };
 
-import type { RegisterDto, AuthResponse } from '../features/auth/types/auth.types';
+import type { RegisterDto, AuthResponse } from '../model/auth.types';
 
 export const authApi = {
     async register(data: RegisterDto): Promise<AuthResponse> {
