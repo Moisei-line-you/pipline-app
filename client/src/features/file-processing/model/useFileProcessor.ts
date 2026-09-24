@@ -1,5 +1,5 @@
 import {type ChangeEvent, useState} from "react";
-import type {FileInfo, ProgressingStatus} from "../types/processing.types.ts";
+import type {FileInfo, ProgressingStatus} from './processing.types';
 
 export const useFileProcessor = () => {
     const [fileInfo, setFileInfo] = useState<FileInfo | null >(null);
