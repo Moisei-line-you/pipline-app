@@ -23,7 +23,7 @@ export const FileProcessorCard: React.FC<FileProcessorCardProps> = ({ onLogout }
             <div className="processor-header">
                 <h1 className="main-app-title">File Processor</h1>
                 {onLogout && (
-                    <button onClick={onLogout} className="logaut-btn">
+                    <button onClick={onLogout} className="logout-btn">
                         Log out
                     </button>
                 )}
