@@ -1,22 +1,20 @@
 {
   "compilerOptions": {
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "resolvePackageJsonExports": true,
-    "esModuleInterop": true,
-    "isolatedModules": true,
-    "declaration": true,
-    "removeComments": true,
+    "module": "commonjs",
+    "target": "ES2022",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "types": ["node"],
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "ES2023",
-    "types": ["node", "jest"],
+    "esModuleInterop": true,
+    "declaration": true,
     "sourceMap": true,
-    "outDir": "./dist",
     "incremental": true,
     "skipLibCheck": true,
-    "strict": true,
-    "strictPropertyInitialization": false
-  }
+    "strict": false,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src"]
 }

@@ -59,11 +59,12 @@ export const RegisterCard: React.FC<RegisterCardProps> = ({
                 <form onSubmit={handleSubmit} className="auth-form" noValidate>
                     {/* Username */}
                     <div className="form-group">
-                        <label htmlFor="username">Username</label>
+                        <label htmlFor="userName">Username</label>
                         <input
                             type="text"
-                            id="username"
+                            id="userName"
                             name="userName"
+                            autoComplete="username"
                             placeholder="Enter your username"
                             value={formData.userName}
                             onChange={handleChange}
@@ -81,6 +82,7 @@ export const RegisterCard: React.FC<RegisterCardProps> = ({
                             id="email"
                             name="email"
                             placeholder="Enter your email"
+                            autoComplete="email"
                             value={formData.email}
                             onChange={handleChange}
                             className={errors.email ? 'input-error' : ''}
@@ -98,6 +100,7 @@ export const RegisterCard: React.FC<RegisterCardProps> = ({
                                 id="password"
                                 name="password"
                                 placeholder="Enter your password"
+                                autoComplete="new-password"
                                 value={formData.password}
                                 onChange={handleChange}
                                 className={errors.password ? 'input-error' : ''}
@@ -119,10 +122,11 @@ export const RegisterCard: React.FC<RegisterCardProps> = ({
                     <div className="form-group">
                         <label htmlFor="confirmPassword">Confirm Password</label>
                         <input
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             id="confirmPassword"
                             name="confirmPassword"
                             placeholder="Confirm your password"
+                            autoComplete="new-password"
                             value={formData.confirmPassword}
                             onChange={handleChange}
                             className={errors.confirmPassword ? 'input-error' : ''}

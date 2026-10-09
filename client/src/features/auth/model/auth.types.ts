@@ -1,11 +1,15 @@
-export interface RegisterFormData{
-    userName:string;
-    email:string;
-    password:string;
-    confirmPassword:string;
+export interface RegisterFormData {
+    userName: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
 }
 
-export type RegisterDto = Omit<RegisterFormData, "confirmPassword">
+export interface RegisterDto {
+    name: string;
+    email: string;
+    password: string;
+}
 
 export interface FormErrors {
     userName?: string;
@@ -14,11 +18,18 @@ export interface FormErrors {
     confirmPassword?: string;
 }
 
+export interface LoginDto {
+    email: string;
+    password: string;
+}
+
+export interface User {
+    id: string;
+    username: string;
+    email: string;
+}
+
 export interface AuthResponse {
-    user: {
-        id: string;
-        username: string;
-        email: string;
-    };
+    user: User;
     token: string;
 }

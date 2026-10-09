@@ -1,15 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LoginCard, RegisterCard } from '../../features/auth';
 import { FileProcessorCard } from '../../features/file-processing';
-import {VariantDashboard} from "../../features/variant-dashboard";
+import { VariantDashboard } from '../../features/variant-dashboard';
+import type { Variant } from '../../features/variant-dashboard';
+import { clearToken, getToken } from '../../shared/lib/authToken';
 
 type Page = 'login' | 'register' | 'process' | 'dashboard';
 
 export const MainPage: React.FC = () => {
-    const [currentPage, setCurrentPage] = useState<Page>('login');
+    const [currentPage, setCurrentPage] = useState<Page>(() =>
+        getToken() ? 'process' : 'login'
+    );
+    const [variants, setVariants] = useState<Variant[] | null>(null);
+
+    useEffect(() => {
+        const authed = Boolean(getToken());
+        if ((currentPage === 'process' || currentPage === 'dashboard') && !authed) {
+            setCurrentPage('login');
+        }
+        if ((currentPage === 'login' || currentPage === 'register') && authed) {
+            setCurrentPage('process');
+        }
+    }, [currentPage]);
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        clearToken();
+        setVariants(null);
         setCurrentPage('login');
     };
 
@@ -32,12 +48,19 @@ export const MainPage: React.FC = () => {
             {currentPage === 'process' && (
                 <FileProcessorCard
                     onLogout={handleLogout}
-                    onProcessSuccess={() => setCurrentPage('dashboard')}
+                    onProcessSuccess={(parsed) => {
+                        setVariants(parsed);
+                        setCurrentPage('dashboard');
+                    }}
                 />
             )}
 
             {currentPage === 'dashboard' && (
-                <VariantDashboard/>
+                <VariantDashboard
+                    variants={variants ?? undefined}
+                    onBack={() => setCurrentPage('process')}
+                    onLogout={handleLogout}
+                />
             )}
         </main>
     );

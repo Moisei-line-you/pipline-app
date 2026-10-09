@@ -1,44 +1,55 @@
-import React from 'react';
+import type { FC } from 'react';
 import { useFileProcessor } from '../model/useFileProcessor';
+import type { Variant } from '../../variant-dashboard/ui/types';
 import './FileProcessorCard.css';
 
 interface FileProcessorCardProps {
     onLogout?: () => void;
-    onProcessSuccess?: () => void;
+    onProcessSuccess?: (variants: Variant[]) => void;
 }
 
-export const FileProcessorCard: React.FC<FileProcessorCardProps> = ({ onLogout, onProcessSuccess }) => {
+export const FileProcessorCard: FC<FileProcessorCardProps> = ({ onLogout, onProcessSuccess }) => {
     const {
         fileInfo,
         status,
         error,
+        fileInputRef,
         handleFileChange,
         handleRemoveFile,
         handleProcess,
-    } = useFileProcessor();
+    } = useFileProcessor(onProcessSuccess);
 
     const isProcessing = status === 'processing';
+    const isCompleted = status === 'completed';
 
     return (
         <div className="processor-container">
             <div className="processor-header">
-                <h1 className="main-app-title">CardioGen</h1>
+                <h1 className="main-app-title">File Processor</h1>
                 {onLogout && (
-                    <button onClick={onLogout} className="logout-btn">
+                    <button type="button" onClick={onLogout} className="logout-btn">
                         Log out
                     </button>
                 )}
             </div>
-
             <div className="processor-card">
                 <h2 className="processor-title">Loading and processing of file</h2>
                 <p className="processor-description">
-                    Select file and press execute
+                    Select a VCF file and press execute
                 </p>
 
                 {error && <div className="server-error">{error}</div>}
 
-                {/* Выбранный файл */}
+                <input
+                    ref={fileInputRef}
+                    id="vcf-file-input"
+                    type="file"
+                    accept=".vcf,text/plain"
+                    onChange={handleFileChange}
+                    className="file-input-hidden"
+                    disabled={isProcessing}
+                />
+
                 {fileInfo ? (
                     <div className="selected-file-box">
                         <div className="file-details">
@@ -51,7 +62,6 @@ export const FileProcessorCard: React.FC<FileProcessorCardProps> = ({ onLogout, 
                                 <span className="file-size">{fileInfo.size}</span>
                             </div>
                         </div>
-
                         {!isProcessing && (
                             <button
                                 type="button"
@@ -63,13 +73,7 @@ export const FileProcessorCard: React.FC<FileProcessorCardProps> = ({ onLogout, 
                         )}
                     </div>
                 ) : (
-                    <label className="file-dropzone">
-                        <input
-                            type="file"
-                            onChange={handleFileChange}
-                            className="file-input-hidden"
-                            disabled={isProcessing}
-                        />
+                    <label className="file-dropzone" htmlFor="vcf-file-input">
                         <svg
                             className="upload-icon-svg"
                             viewBox="0 0 24 24"
@@ -83,21 +87,13 @@ export const FileProcessorCard: React.FC<FileProcessorCardProps> = ({ onLogout, 
                             <polyline points="17 8 12 3 7 8" />
                             <line x1="12" y1="3" x2="12" y2="15" />
                         </svg>
-                        <span className="upload-text">Click to upload file</span>
+                        <span className="upload-text">Click to upload VCF file</span>
                     </label>
                 )}
 
-                {status === 'completed' && (
+                {isCompleted && (
                     <div className="success-message" style={{ marginTop: '16px' }}>
-                        <p>File Completed successfully</p>
-                        <button
-                            type="button"
-                            onClick={onProcessSuccess}
-                            className="submit-btn"
-                            style={{ marginTop: '16px' }}
-                        >
-                            View Dashboards →
-                        </button>
+                        File processed successfully
                     </div>
                 )}
 
@@ -108,7 +104,7 @@ export const FileProcessorCard: React.FC<FileProcessorCardProps> = ({ onLogout, 
                     style={{ marginTop: '20px' }}
                     disabled={!fileInfo || isProcessing}
                 >
-                    {isProcessing ? 'Processing...' : 'Execute file'}
+                    {isProcessing ? 'Processing' : 'Execute file'}
                 </button>
             </div>
         </div>

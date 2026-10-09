@@ -188,6 +188,11 @@
     border: 1px solid #374151;
 }
 
+.social-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
 .auth-switch-text {
     text-align: center;
     margin-top: 20px;

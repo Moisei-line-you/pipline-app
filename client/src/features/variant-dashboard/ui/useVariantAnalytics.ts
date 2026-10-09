@@ -54,7 +54,7 @@ export function useVariantAnalytics(variants: Variant[]): VariantAnalytics {
     let sumQd = 0;
     let sumSor = 0;
 
-    const chromCounts: Record<string, number> = {};
+    const rawChromCounts: Record<string, number> = {};
     const mutationCounts: Record<string, number> = {};
     const abBins = emptyBins(AB_LABELS);
     const gqBins = emptyBins(GQ_LABELS);
@@ -78,7 +78,7 @@ export function useVariantAnalytics(variants: Variant[]): VariantAnalytics {
         indelCount++;
       }
 
-      chromCounts[v.chr] = (chromCounts[v.chr] ?? 0) + 1;
+      rawChromCounts[v.chr] = (rawChromCounts[v.chr] ?? 0) + 1;
 
       sumGq += v.gq;
       sumMq += v.mq;
@@ -116,6 +116,13 @@ export function useVariantAnalytics(variants: Variant[]): VariantAnalytics {
       else if (v.bqrs <= 0.0) bqrsBins['-1.5-0.0']++;
       else bqrsBins['0.0+ (good)']++;
     }
+
+    const chromCounts: Record<string, number> = {};
+    Object.keys(rawChromCounts)
+        .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+        .forEach((key) => {
+          chromCounts[key] = rawChromCounts[key];
+        });
 
     return {
       total,

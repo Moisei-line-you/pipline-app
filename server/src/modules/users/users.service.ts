@@ -1,25 +1,18 @@
-import {Injectable, Logger} from "@nestjs/common";
-import {User} from "./entities/user.entity";
-import {CreateUserDto} from "./dto/create-user.dto";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../providers/database/prisma.service';
 
 @Injectable()
 export class UsersService {
-    private readonly users: User[] = [];
+    constructor(private readonly prisma: PrismaService) {}
 
-    async create(createUserDto: CreateUserDto): Promise<User> {
-        const newUser: User = {
-            id: Date.now().toString(),
-            ...createUserDto,
-        };
-        this.users.push(newUser);
-        return newUser;
+    findByEmail(email: string) {
+        return this.prisma.user.findUnique({ where: { email } });
     }
 
-    async findByEmail(email: string): Promise<User | undefined> {
-        return this.users.find((user) => user.email === email);
-    }
-
-    async findById(id: string): Promise<User | undefined> {
-        return this.users.find((user) => user.id === id);
+    create(data: { email: string; passwordHash: string; name?: string }) {
+        return this.prisma.user.create({
+            data,
+            select: { id: true, email: true, name: true, createdAt: true }, // хэш пароля наружу не отдаём
+        });
     }
 }

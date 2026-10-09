@@ -1,10 +1,31 @@
-const API_BASE_URL = 'http://localhost:3000/api';
+import { getToken } from '../lib/authToken';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? '/api';
+
+export class HttpError extends Error {
+    status: number;
+
+    constructor(message: string, status: number) {
+        super(message);
+        this.name = 'HttpError';
+        this.status = status;
+    }
+}
+
+function parseBody(text: string): { message?: string | string[] } | unknown {
+    if (!text) return {};
+    try {
+        return JSON.parse(text);
+    } catch {
+        return {};
+    }
+}
 
 export const httpClient = async <T>(
     endpoint: string,
     options: RequestInit = {}
 ): Promise<T> => {
-    const token = localStorage.getItem('token');
+    const token = getToken();
 
     const headers: HeadersInit = {
         'Content-Type': 'application/json',
@@ -12,19 +33,26 @@ export const httpClient = async <T>(
         ...options.headers,
     };
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        ...options,
-        headers,
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = Array.isArray(errorData.message)
-            ? errorData.message.join(', ')
-            : errorData.message || 'Произошла ошибка при запросе';
-
-        throw new Error(errorMessage);
+    let response: Response;
+    try {
+        response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            ...options,
+            headers,
+        });
+    } catch {
+        throw new HttpError('Cannot reach the server. Check that the API is running.', 0);
     }
 
-    return response.json();
+    const text = await response.text();
+    const data = parseBody(text) as { message?: string | string[] };
+
+    if (!response.ok) {
+        const errorMessage = Array.isArray(data.message)
+            ? data.message.join(', ')
+            : data.message || 'Request failed';
+
+        throw new HttpError(errorMessage, response.status);
+    }
+
+    return (text ? parseBody(text) : undefined) as T;
 };

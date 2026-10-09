@@ -1,5 +1,8 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { authApi } from '../api/authApi';
+import { setToken } from '../../../shared/lib/authToken';
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const useLogin = (onSuccess?: () => void) => {
     const [formData, setFormData] = useState({
@@ -17,18 +20,28 @@ export const useLogin = (onSuccess?: () => void) => {
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setIsLoading(true);
         setServerError(null);
+
+        if (!formData.email) {
+            setServerError('Email is required');
+            return;
+        }
+        if (!emailRegex.test(formData.email)) {
+            setServerError('Not a valid email address');
+            return;
+        }
+        if (!formData.password) {
+            setServerError('Password is required');
+            return;
+        }
+
+        setIsLoading(true);
 
         try {
             const response = await authApi.login(formData);
-            localStorage.setItem('token', response.token);
-
-            if (onSuccess) {
-                onSuccess();
-            }
+            setToken(response.token);
+            onSuccess?.();
         } catch (err) {
-            // Безопасная извлечение ошибки без использования any
             if (err instanceof Error) {
                 setServerError(err.message);
             } else {

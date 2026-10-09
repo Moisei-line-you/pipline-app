@@ -1,78 +1,156 @@
 import type { ApexOptions } from 'apexcharts';
-
-export type ThemeMode = 'dark';
-
-const PALETTES = { text: '#9ca3af', grid: '#374151'};
-
-const baseChart: ApexOptions['chart'] = {
-  background: 'transparent',
-  toolbar: { show: false },
-  animations: { speed: 250 },
-  fontFamily: 'inherit',
-};
-
-export function makeBarOptions(
-    categories: (string | number)[],
+export const makeBarOptions = (
+    categories: string[],
     color: string,
-    theme: ThemeMode = 'dark',
-    opts: { horizontal?: boolean; yFormatter?: (v: number) => string } = {}
-): ApexOptions {
-  return {
-    chart: { ...baseChart, type: 'bar' },
-    theme: { mode: "dark" },
-    colors: [color],
-    xaxis: {
-      categories,
-      labels: { style: { colors: PALETTES.text, fontSize: '11px' }, rotate: -35, trim: true },
+    extra?: { yFormatter?: (v: number) => string }
+): ApexOptions => ({
+  chart: {
+    type: 'bar',
+    toolbar: { show: false },
+    parentHeightOffset: 0,
+  },
+  colors: [color],
+  grid: {
+    padding: { top: 10, right: 15, bottom: 10, left: 15 },
+  },
+  xaxis: {
+    categories,
+    labels: {
+      rotate: -45,
+      rotateAlways: false,
+      hideOverlappingLabels: true,
+      style: { fontSize: '11px' },
     },
-    yaxis: {
-      labels: {
-        style: { colors: PALETTES.text },
-        formatter: opts.yFormatter ?? ((v: number) => Math.round(v).toString()),
+  },
+  yaxis: {
+    labels: {
+      formatter: extra?.yFormatter,
+      style: { fontSize: '11px' },
+    },
+  },
+  plotOptions: {
+    bar: {
+      columnWidth: '50%',
+      borderRadius: 4,
+    },
+  },
+});
+
+export const makeScatterOptions = (
+    color: string,
+    yTitle: string
+): ApexOptions => ({
+  chart: {
+    type: 'scatter',
+    toolbar: { show: false },
+    parentHeightOffset: 0,
+    zoom: { enabled: true },
+  },
+  colors: [color],
+  grid: {
+    padding: { top: 10, right: 15, bottom: 10, left: 15 },
+  },
+  xaxis: {
+    type: 'numeric',
+    tickAmount: 6,
+    labels: {
+      formatter: (val: number) => (val ? Math.round(val).toLocaleString() : ''),
+      style: { fontSize: '11px' },
+    },
+    title: {
+      text: 'Position',
+      style: { color: '#9ca3af', fontSize: '12px' },
+    },
+  },
+  yaxis: {
+    title: {
+      text: yTitle,
+      style: { color: '#9ca3af', fontSize: '12px' },
+    },
+    labels: {
+      style: { fontSize: '11px' },
+    },
+  },
+  markers: {
+    size: 4,
+  },
+});
+
+export const makeDonutOptions = (
+    labels: string[],
+    colors: string[],
+): ApexOptions => ({
+  chart: {
+    type: 'donut',
+  },
+  labels,
+  colors,
+  legend: {
+    position: 'bottom',
+    fontSize: '12px',
+    itemMargin: { horizontal: 8, vertical: 4 },
+  },
+  plotOptions: {
+    pie: {
+      donut: {
+        size: '65%',
       },
     },
-    grid: { borderColor: PALETTES.grid, strokeDashArray: 3 },
-    plotOptions: { bar: { borderRadius: 4, columnWidth: '55%', horizontal: opts.horizontal ?? false } },
-    dataLabels: { enabled: false },
-    tooltip: { theme },
-  };
-}
+  },
+});
 
-export function makeScatterOptions(
-    categories: (string | number)[],
+export const makeAreaOptions = (
     color: string,
-    theme: ThemeMode = 'dark',
-    yTitle?: string
-): ApexOptions {
-  return {
-    chart: { ...baseChart, type: 'scatter', zoom: { enabled: true, type: 'xy' } },
-    theme: { mode: 'dark' },
-    colors: [color],
-    xaxis: {
-      categories,
-      labels: { style: { colors: PALETTES.text }, formatter: (v: string) => Number(v).toLocaleString() },
-      title: { text: 'Position', style: { color: PALETTES.text } },
+): ApexOptions => ({
+  chart: {
+    type: 'area',
+    toolbar: { show: false },
+    parentHeightOffset: 0,
+    zoom: { enabled: true },
+  },
+  dataLabels: {
+    enabled: false,
+  },
+  colors: [color],
+  stroke: {
+    curve: 'straight',
+    width: 1.5,
+  },
+  fill: {
+    type: 'gradient',
+    gradient: {
+      shadeIntensity: 1,
+      opacityFrom: 0.4,
+      opacityTo: 0.05,
     },
-    yaxis: {
-      labels: { style: { colors: PALETTES.text } },
-      title: yTitle ? { text: yTitle, style: { color: PALETTES.text } } : undefined,
+  },
+  grid: {
+    padding: { top: 10, right: 20, bottom: 10, left: 15 },
+  },
+  xaxis: {
+    type: 'numeric',
+    tickAmount: 6,
+    labels: {
+      formatter: (val: number) => (val ? Math.round(val).toLocaleString() : ''),
+      style: { fontSize: '11px' },
     },
-    grid: { borderColor: PALETTES.grid, strokeDashArray: 3 },
-    markers: { size: 5, strokeWidth: 0 },
-    tooltip: { theme },
-  };
-}
-
-export function makeDonutOptions(labels: string[], colors: string[], theme: ThemeMode): ApexOptions {
-  return {
-    chart: { ...baseChart, type: 'donut' },
-    labels,
-    theme: { mode: 'dark' },
-    colors,
-    legend: { position: 'bottom', labels: { colors: PALETTES.text }, fontSize: '12px' },
-    dataLabels: { enabled: true, formatter: (val: number) => `${val.toFixed(0)}%` },
-    stroke: { width: 0 },
-    tooltip: { theme },
-    plotOptions: { pie: { donut: { labels: { show: true, total: { show: true, color: PALETTES.text } } } } },
-  };
-}
+    title: {
+      text: 'Position',
+      style: { color: '#9ca3af', fontSize: '12px' },
+    },
+  },
+  yaxis: {
+    labels: {
+      style: { fontSize: '11px' },
+    },
+    title: {
+      text: 'QUAL',
+      style: { color: '#9ca3af', fontSize: '12px' },
+    },
+  },
+  tooltip: {
+    x: {
+      formatter: (val: number) => `Pos: ${val?.toLocaleString()}`,
+    },
+  },
+});
