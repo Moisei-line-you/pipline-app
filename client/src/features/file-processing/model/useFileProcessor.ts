@@ -1,16 +1,22 @@
-import {type ChangeEvent, useState} from "react";
-import type {FileInfo, ProgressingStatus} from './processing.types';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import type { FileInfo, ProcessingStatus } from './processing.types';
+import type { Variant } from '../../variant-dashboard/ui/types';
+import { formatFileSize } from '../../../shared/lib/formatFileSize';
+import { parseVcf } from './parseVcf';
 
-export const useFileProcessor = () => {
-    const [fileInfo, setFileInfo] = useState<FileInfo | null >(null);
-    const [status, setStatus] = useState<ProgressingStatus> ('idle');
+export const useFileProcessor = (onProcessSuccess?: (variants: Variant[]) => void) => {
+    const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
+    const [status, setStatus] = useState<ProcessingStatus>('idle');
     const [error, setError] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const aliveRef = useRef(true);
 
-    const formatFileSize = (bytes: number) => {
-        if (bytes === 1024) return bytes + 'B';
-        if (bytes === 1024 * 1024) return (bytes / 1024).toFixed(2) + 'KB';
-        return (bytes / 1024 * 1024).toFixed(1) + 'MB';
-    };
+    useEffect(() => {
+        aliveRef.current = true;
+        return () => {
+            aliveRef.current = false;
+        };
+    }, []);
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -30,6 +36,9 @@ export const useFileProcessor = () => {
         setFileInfo(null);
         setStatus('idle');
         setError(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
     };
 
     const handleProcess = async () => {
@@ -38,20 +47,48 @@ export const useFileProcessor = () => {
             return;
         }
 
+        const lowerName = fileInfo.name.toLowerCase();
+        if (lowerName.endsWith('.gz')) {
+            setError('Compressed VCF (.gz) is not supported. Please upload a plain .vcf file.');
+            return;
+        }
+        if (!lowerName.endsWith('.vcf')) {
+            setError('Please upload a .vcf file');
+            return;
+        }
+
         setStatus('processing');
         setError(null);
 
-        setTimeout(() => {
+        try {
+            const text = await fileInfo.rawFile.text();
+            if (!aliveRef.current) return;
+
+            const variants = parseVcf(text);
+            if (!aliveRef.current) return;
+
+            if (variants.length === 0) {
+                setStatus('file-selected');
+                setError('No variants found in this file');
+                return;
+            }
+
             setStatus('completed');
-        }, 2000);
+            onProcessSuccess?.(variants);
+        } catch (err) {
+            if (!aliveRef.current) return;
+            setStatus('file-selected');
+            setError(err instanceof Error ? err.message : 'Failed to process file');
+        }
     };
 
     return {
-     fileInfo,
-     status,
-     error,
-     handleFileChange,
-     handleRemoveFile,
+        fileInfo,
+        status,
+        error,
+        fileInputRef,
+        handleFileChange,
+        handleRemoveFile,
         handleProcess,
-    }
-}
+    };
+};

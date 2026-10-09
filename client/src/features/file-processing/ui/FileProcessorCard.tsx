@@ -1,19 +1,23 @@
-import {useFileProcessor} from '../model/useFileProcessor';
+import type { FC } from 'react';
+import { useFileProcessor } from '../model/useFileProcessor';
+import type { Variant } from '../../variant-dashboard/ui/types';
 import './FileProcessorCard.css';
 
 interface FileProcessorCardProps {
     onLogout?: () => void;
+    onProcessSuccess?: (variants: Variant[]) => void;
 }
 
-export const FileProcessorCard: React.FC<FileProcessorCardProps> = ({ onLogout }) => {
+export const FileProcessorCard: FC<FileProcessorCardProps> = ({ onLogout, onProcessSuccess }) => {
     const {
         fileInfo,
         status,
         error,
+        fileInputRef,
         handleFileChange,
         handleRemoveFile,
         handleProcess,
-    } = useFileProcessor();
+    } = useFileProcessor(onProcessSuccess);
 
     const isProcessing = status === 'processing';
     const isCompleted = status === 'completed';
@@ -23,7 +27,7 @@ export const FileProcessorCard: React.FC<FileProcessorCardProps> = ({ onLogout }
             <div className="processor-header">
                 <h1 className="main-app-title">File Processor</h1>
                 {onLogout && (
-                    <button onClick={onLogout} className="logout-btn">
+                    <button type="button" onClick={onLogout} className="logout-btn">
                         Log out
                     </button>
                 )}
@@ -31,12 +35,21 @@ export const FileProcessorCard: React.FC<FileProcessorCardProps> = ({ onLogout }
             <div className="processor-card">
                 <h2 className="processor-title">Loading and processing of file</h2>
                 <p className="processor-description">
-                    Select file and press execute
+                    Select a VCF file and press execute
                 </p>
 
                 {error && <div className="server-error">{error}</div>}
 
-                {/* Выбранный файл */}
+                <input
+                    ref={fileInputRef}
+                    id="vcf-file-input"
+                    type="file"
+                    accept=".vcf,text/plain"
+                    onChange={handleFileChange}
+                    className="file-input-hidden"
+                    disabled={isProcessing}
+                />
+
                 {fileInfo ? (
                     <div className="selected-file-box">
                         <div className="file-details">
@@ -49,51 +62,41 @@ export const FileProcessorCard: React.FC<FileProcessorCardProps> = ({ onLogout }
                                 <span className="file-size">{fileInfo.size}</span>
                             </div>
                         </div>
-                    {!isProcessing && (
-                        <button
-                        type="button"
-                        className="remove-file-btn"
-                        onClick={handleRemoveFile}
-                        >
-                            ✕
-                        </button>
-                    )}
-            </div>
-
+                        {!isProcessing && (
+                            <button
+                                type="button"
+                                className="remove-file-btn"
+                                onClick={handleRemoveFile}
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
                 ) : (
-                //Область выбора файла
-                <label className="file-dropzone">
-                    <input
-                        type="file"
-                        onChange={handleFileChange}
-                        className="file-input-hidden"
-                        disabled={isProcessing}
-                        />
-                    <svg
-                        className="upload-icon-svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    >
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="17 8 12 3 7 8" />
-                        <line x1="12" y1="3" x2="12" y2="15" />
-                    </svg>
-                    <span className="upload-text">Click to upload file</span>
-                </label>
+                    <label className="file-dropzone" htmlFor="vcf-file-input">
+                        <svg
+                            className="upload-icon-svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        <span className="upload-text">Click to upload VCF file</span>
+                    </label>
                 )}
 
-                {/* Статус успешной обработки */}
                 {isCompleted && (
                     <div className="success-message" style={{ marginTop: '16px' }}>
-                        File Completed successfully
+                        File processed successfully
                     </div>
                 )}
 
-                {/* Кнопка запуска обработки */}
                 <button
                     type="button"
                     onClick={handleProcess}
