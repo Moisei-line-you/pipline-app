@@ -1,11 +1,13 @@
-import {useFileProcessor} from '../model/useFileProcessor';
+import React from 'react';
+import { useFileProcessor } from '../model/useFileProcessor';
 import './FileProcessorCard.css';
 
 interface FileProcessorCardProps {
     onLogout?: () => void;
+    onProcessSuccess?: () => void;
 }
 
-export const FileProcessorCard: React.FC<FileProcessorCardProps> = ({ onLogout }) => {
+export const FileProcessorCard: React.FC<FileProcessorCardProps> = ({ onLogout, onProcessSuccess }) => {
     const {
         fileInfo,
         status,
@@ -16,18 +18,18 @@ export const FileProcessorCard: React.FC<FileProcessorCardProps> = ({ onLogout }
     } = useFileProcessor();
 
     const isProcessing = status === 'processing';
-    const isCompleted = status === 'completed';
 
     return (
         <div className="processor-container">
             <div className="processor-header">
-                <h1 className="main-app-title">File Processor</h1>
+                <h1 className="main-app-title">CardioGen</h1>
                 {onLogout && (
                     <button onClick={onLogout} className="logout-btn">
                         Log out
                     </button>
                 )}
             </div>
+
             <div className="processor-card">
                 <h2 className="processor-title">Loading and processing of file</h2>
                 <p className="processor-description">
@@ -49,51 +51,56 @@ export const FileProcessorCard: React.FC<FileProcessorCardProps> = ({ onLogout }
                                 <span className="file-size">{fileInfo.size}</span>
                             </div>
                         </div>
-                    {!isProcessing && (
-                        <button
-                        type="button"
-                        className="remove-file-btn"
-                        onClick={handleRemoveFile}
-                        >
-                            ✕
-                        </button>
-                    )}
-            </div>
 
+                        {!isProcessing && (
+                            <button
+                                type="button"
+                                className="remove-file-btn"
+                                onClick={handleRemoveFile}
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
                 ) : (
-                //Область выбора файла
-                <label className="file-dropzone">
-                    <input
-                        type="file"
-                        onChange={handleFileChange}
-                        className="file-input-hidden"
-                        disabled={isProcessing}
+                    <label className="file-dropzone">
+                        <input
+                            type="file"
+                            onChange={handleFileChange}
+                            className="file-input-hidden"
+                            disabled={isProcessing}
                         />
-                    <svg
-                        className="upload-icon-svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    >
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="17 8 12 3 7 8" />
-                        <line x1="12" y1="3" x2="12" y2="15" />
-                    </svg>
-                    <span className="upload-text">Click to upload file</span>
-                </label>
+                        <svg
+                            className="upload-icon-svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        <span className="upload-text">Click to upload file</span>
+                    </label>
                 )}
 
-                {/* Статус успешной обработки */}
-                {isCompleted && (
+                {status === 'completed' && (
                     <div className="success-message" style={{ marginTop: '16px' }}>
-                        File Completed successfully
+                        <p>File Completed successfully</p>
+                        <button
+                            type="button"
+                            onClick={onProcessSuccess}
+                            className="submit-btn"
+                            style={{ marginTop: '16px' }}
+                        >
+                            View Dashboards →
+                        </button>
                     </div>
                 )}
 
-                {/* Кнопка запуска обработки */}
                 <button
                     type="button"
                     onClick={handleProcess}
@@ -101,7 +108,7 @@ export const FileProcessorCard: React.FC<FileProcessorCardProps> = ({ onLogout }
                     style={{ marginTop: '20px' }}
                     disabled={!fileInfo || isProcessing}
                 >
-                    {isProcessing ? 'Processing' : 'Execute file'}
+                    {isProcessing ? 'Processing...' : 'Execute file'}
                 </button>
             </div>
         </div>

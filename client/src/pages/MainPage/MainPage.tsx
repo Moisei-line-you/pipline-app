@@ -1,19 +1,44 @@
-import {RegisterCard} from '../../features/auth/ui/RegistrationCard.tsx';
-import {useState} from "react";
-import {FileProcessorCard} from '../../features/file-processing/ui/FileProcessorCard.tsx';
+import React, { useState } from 'react';
+import { LoginCard, RegisterCard } from '../../features/auth';
+import { FileProcessorCard } from '../../features/file-processing';
+import {VariantDashboard} from "../../features/variant-dashboard";
 
-type Page = 'register' | 'process';
+type Page = 'login' | 'register' | 'process' | 'dashboard';
 
 export const MainPage: React.FC = () => {
-    const [currentPage, setCurrentPage] = useState<Page>('register');
+    const [currentPage, setCurrentPage] = useState<Page>('login');
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        setCurrentPage('login');
+    };
 
     return (
-        <>
-            {currentPage === 'register' ? (
-                <RegisterCard onSuccess={() => setCurrentPage('process')} />
-            ) : (
-                <FileProcessorCard onLogout={() => setCurrentPage('register')} />
+        <main>
+            {currentPage === 'login' && (
+                <LoginCard
+                    onSuccess={() => setCurrentPage('process')}
+                    onSwitchToRegister={() => setCurrentPage('register')}
+                />
             )}
-        </>
+
+            {currentPage === 'register' && (
+                <RegisterCard
+                    onSuccess={() => setCurrentPage('process')}
+                    onSwitchToLogin={() => setCurrentPage('login')}
+                />
+            )}
+
+            {currentPage === 'process' && (
+                <FileProcessorCard
+                    onLogout={handleLogout}
+                    onProcessSuccess={() => setCurrentPage('dashboard')}
+                />
+            )}
+
+            {currentPage === 'dashboard' && (
+                <VariantDashboard/>
+            )}
+        </main>
     );
 };

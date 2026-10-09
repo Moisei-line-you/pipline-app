@@ -4,4 +4,4 @@ export interface FileInfo {
     rawFile: File;
 }
 
-export type ProgressingStatus = 'idle' | 'file-selected' | 'processing' | 'completed';
+export type ProcessingStatus= 'idle' | 'file-selected' | 'processing' | 'completed';
