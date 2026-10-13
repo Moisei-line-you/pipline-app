@@ -54,3 +54,5 @@ coverage/
 .temp/
 .tmp/
 /src/generated/prisma
+
+storage/uploads/
