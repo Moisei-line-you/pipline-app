@@ -4,43 +4,69 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #121212;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    padding: 20px;
-    box-sizing: border-box;
+    padding: 24px;
+    background: radial-gradient(circle at top, #254E58 0%, #112D32 70%);
 }
 
 .main-app-title {
+    margin: 0 0 24px;
     font-size: 32px;
     font-weight: 800;
-    color: #ffffff;
-    margin: 0 0 24px 0;
-    text-align: center;
+    background: linear-gradient(90deg, #E8F1F0, #88BDBC);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.5px;
 }
 
 .auth-card {
-    background-color: #1e1e1e;
+    background: #183B43;
     padding: 36px 32px;
     border-radius: 16px;
-    border: 1px solid #2d2d2d;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    border: 1px solid #6E6658;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
     width: 100%;
     max-width: 420px;
     box-sizing: border-box;
 }
 
+.auth-card-header {
+    margin-bottom: 4px;
+}
+
 .auth-title {
-    margin: 0 0 8px 0;
+    margin: 0 0 8px;
     font-size: 24px;
     font-weight: 700;
-    color: #ffffff;
+    color: #88BDBC;
     text-align: center;
 }
 
 .auth-description {
-    margin: 0 0 24px 0;
+    margin: 0 0 24px;
     font-size: 14px;
-    color: #9ca3af;
+    color: #A3B8B8;
+    text-align: center;
+}
+
+.server-error {
+    margin-bottom: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+    font-size: 14px;
+    text-align: center;
+}
+
+.success-message {
+    padding: 14px;
+    border-radius: 8px;
+    background: rgba(136, 189, 188, 0.2);
+    border: 1px solid #88BDBC;
+    color: #88BDBC;
+    font-size: 15px;
+    font-weight: 600;
     text-align: center;
 }
 
@@ -54,103 +80,114 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+    text-align: left;
 }
 
 .form-group label {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    color: #f3f4f6;
+    color: #A3B8B8;
 }
 
 .form-group input {
     width: 100%;
-    padding: 10px 14px;
+    padding: 11px 14px;
     font-size: 14px;
-    border: 1px solid #374151;
+    border: 1px solid #6E6658;
     border-radius: 8px;
-    background-color: #2b2b2b;
-    color: #ffffff;
+    background-color: #112D32;
+    color: #E8F1F0;
     outline: none;
-    transition: border-color 0.15s ease;
+    transition: border-color 0.2s, box-shadow 0.2s;
     box-sizing: border-box;
 }
 
+.form-group input::placeholder {
+    color: rgba(163, 184, 184, 0.5);
+}
+
 .form-group input:focus {
-    border-color: #3b82f6;
+    border-color: #88BDBC;
+    box-shadow: 0 0 0 3px rgba(136, 189, 188, 0.2);
 }
 
-.forgot-password-wrapper {
-    text-align: right;
-    margin-top: -4px;
+.form-group input.input-error {
+    border-color: #ef4444;
 }
 
-.forgot-link {
-    font-size: 13px;
-    color: #60a5fa;
-    text-decoration: none;
+.error-text {
+    font-size: 12px;
+    color: #fca5a5;
 }
 
-.forgot-link:hover {
-    text-decoration: underline;
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    padding-right: 64px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #88BDBC;
+    background: transparent;
+    border: none;
+    cursor: pointer;
 }
 
 .submit-btn {
-    margin-top: 8px;
     width: 100%;
-    padding: 12px;
-    background-color: #2563eb;
-    color: #ffffff;
+    margin-top: 6px;
+    padding: 12px 18px;
     font-size: 15px;
-    font-weight: 600;
-    border: none;
+    font-weight: 700;
+    color: #112D32;
+    background-color: #88BDBC;
+    border: 1px solid #88BDBC;
     border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.15s ease;
+    transition: all 0.2s ease;
 }
 
 .submit-btn:hover:not(:disabled) {
-    background-color: #1d4ed8;
+    background-color: #9ececd;
+    border-color: #9ececd;
 }
 
 .submit-btn:disabled {
-    background-color: #1e3a8a;
-    color: #93c5fd;
+    background-color: #4F4A41;
+    border-color: #6E6658;
+    color: #A3B8B8;
     cursor: not-allowed;
 }
 
-.server-error {
-    background-color: rgba(239, 68, 68, 0.15);
-    border: 1px solid #ef4444;
-    color: #fca5a5;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    margin-bottom: 16px;
-    text-align: center;
-}
-
-/* Разделитель OR */
 .divider {
     display: flex;
     align-items: center;
     margin: 20px 0;
+    color: #A3B8B8;
+    font-size: 12px;
 }
 
 .divider::before,
 .divider::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid #374151;
+    height: 1px;
+    background: rgba(110, 102, 88, 0.45);
 }
 
 .divider span {
     padding: 0 12px;
-    color: #6b7280;
-    font-size: 12px;
-    font-weight: 600;
 }
 
-/* Кнопки соцсетей */
 .social-buttons {
     display: flex;
     flex-direction: column;
@@ -163,12 +200,19 @@
     justify-content: center;
     gap: 10px;
     width: 100%;
-    padding: 10px;
+    padding: 10px 14px;
     border-radius: 8px;
+    border: 1px solid #6E6658;
+    background: #4F4A41;
+    color: #E8F1F0;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
-    box-sizing: border-box;
+}
+
+.social-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
 }
 
 .social-icon {
@@ -176,37 +220,24 @@
     height: 18px;
 }
 
-.social-btn-apple {
-    background-color: #000000;
-    color: #ffffff;
-    border: 1px solid #374151;
-}
-
-.social-btn-google {
-    background-color: #2b2b2b;
-    color: #ffffff;
-    border: 1px solid #374151;
-}
-
-.social-btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-}
-
 .auth-switch-text {
-    text-align: center;
-    margin-top: 20px;
+    margin: 20px 0 0;
     font-size: 14px;
-    color: #9ca3af;
+    color: #A3B8B8;
+    text-align: center;
 }
 
 .auth-switch-link {
     background: none;
     border: none;
-    color: #60a5fa;
-    font-weight: 600;
-    cursor: pointer;
     padding: 0;
-    font-size: 14px;
+    font: inherit;
+    font-weight: 700;
+    color: #88BDBC;
+    cursor: pointer;
     text-decoration: underline;
+}
+
+.auth-switch-link:hover {
+    color: #E8F1F0;
 }

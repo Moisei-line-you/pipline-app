@@ -59,13 +59,13 @@ export const makeScatterOptions = (
     },
     title: {
       text: 'Position',
-      style: { color: '#9ca3af', fontSize: '12px' },
+      style: { color: '#88BDBC', fontSize: '12px' },
     },
   },
   yaxis: {
     title: {
       text: yTitle,
-      style: { color: '#9ca3af', fontSize: '12px' },
+      style: { color: '#88BDBC', fontSize: '12px' },
     },
     labels: {
       style: { fontSize: '11px' },
@@ -136,7 +136,7 @@ export const makeAreaOptions = (
     },
     title: {
       text: 'Position',
-      style: { color: '#9ca3af', fontSize: '12px' },
+      style: { color: '#88BDBC', fontSize: '12px' },
     },
   },
   yaxis: {
@@ -145,7 +145,7 @@ export const makeAreaOptions = (
     },
     title: {
       text: 'QUAL',
-      style: { color: '#9ca3af', fontSize: '12px' },
+      style: { color: '#88BDBC', fontSize: '12px' },
     },
   },
   tooltip: {

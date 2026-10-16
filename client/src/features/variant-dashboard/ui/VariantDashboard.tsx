@@ -223,7 +223,7 @@ export const VariantDashboard: React.FC<VariantDashboardProps> = ({
                 description:
                     'Отражает глубину покрытия (Read Depth) — количество считываний секвенирования, приходящихся на данную позицию. Помогает выявить участки с низким или избыточным покрытием.',
                 type: 'scatter',
-                options: makeScatterOptions('#10b981', 'dark'),
+                options: makeScatterOptions('#10b981', 'DP'),
                 series: [{ name: 'Depth', data: filteredVariants.map((v) => [v.pos, v.dp]) }],
             },
             {
@@ -232,7 +232,7 @@ export const VariantDashboard: React.FC<VariantDashboardProps> = ({
                 description:
                     'Z-оценка разницы в позициях ридов для альтернативных и референсных аллелей. Значения сильно отклоняющиеся от нуля могут указывать на технологические артефакты секвенирования.',
                 type: 'scatter',
-                options: makeScatterOptions('#a855f7', 'dark'),
+                options: makeScatterOptions('#a855f7', 'RPRS'),
                 series: [{ name: 'ReadPosRankSum', data: filteredVariants.map((v) => [v.pos, v.rprs]) }],
             },
             {
@@ -430,11 +430,6 @@ export const VariantDashboard: React.FC<VariantDashboardProps> = ({
                     >
                         Export CSV
                     </button>
-                    {onLogout && (
-                        <button type="button" className="vd-btn vd-btn-ghost" onClick={onLogout}>
-                            Log out
-                        </button>
-                    )}
                 </div>
             </header>
 

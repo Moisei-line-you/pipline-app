@@ -1,0 +1,265 @@
+.home-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 36px 24px;
+    color: #E8F1F0;
+}
+
+/* 1. Блок о проекте */
+.home-hero {
+    background: linear-gradient(135deg, #254E58 0%, #112D32 65%, #4F4A41 100%);
+    border: 1px solid #6E6658;
+    border-radius: 16px;
+    padding: 40px 36px;
+    margin-bottom: 32px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.hero-heading {
+    margin: 0 0 14px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #88BDBC;
+    line-height: 1.3;
+}
+
+.hero-subheading {
+    margin: 0;
+    font-size: 16px;
+    color: #E8F1F0;
+    max-width: 760px;
+    line-height: 1.6;
+    opacity: 0.92;
+}
+
+/* 2. Карточки-счетчики (KPI Grid) */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 36px;
+}
+
+.kpi-card {
+    background: #183B43;
+    border: 1px solid #254E58;
+    border-radius: 14px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+    border-color: #88BDBC;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.kpi-yellow {
+    border-top: 3px solid #6E6658;
+}
+
+.kpi-green {
+    border-top: 3px solid #88BDBC;
+}
+
+.kpi-blue {
+    border-top: 3px solid #254E58;
+}
+
+.kpi-action {
+    background: linear-gradient(135deg, #254E58 0%, #183B43 100%);
+    border: 1px solid #88BDBC;
+    cursor: pointer;
+}
+
+.kpi-action:hover {
+    background: linear-gradient(135deg, #2d5e6a 0%, #254E58 100%);
+}
+
+.kpi-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #A3B8B8;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.kpi-value {
+    font-size: 34px;
+    font-weight: 800;
+    color: #88BDBC;
+    line-height: 1.1;
+}
+
+.kpi-btn-text {
+    font-size: 22px;
+    font-weight: 700;
+    color: #88BDBC;
+    line-height: 1.2;
+}
+
+.kpi-desc {
+    font-size: 13px;
+    color: #A3B8B8;
+    line-height: 1.4;
+}
+
+/* 3. Недавние анализы */
+.recent-section {
+    background: #183B43;
+    border: 1px solid #254E58;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #88BDBC;
+}
+
+.link-btn {
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid #6E6658;
+    background: #4F4A41;
+    color: #E8F1F0;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.link-btn:hover {
+    background: #6E6658;
+    border-color: #88BDBC;
+    color: #ffffff;
+}
+
+.empty-box {
+    padding: 40px 20px;
+    text-align: center;
+    background: #112D32;
+    border: 1px dashed #6E6658;
+    border-radius: 10px;
+    color: #A3B8B8;
+    font-size: 14px;
+}
+
+.recent-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+.recent-card {
+    background: #112D32;
+    border: 1px solid #254E58;
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 14px;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.recent-card:hover {
+    border-color: #88BDBC;
+    transform: translateY(-2px);
+}
+
+.recent-file-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #E8F1F0;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.recent-file-sub {
+    margin-top: 3px;
+    font-size: 12px;
+    color: #A3B8B8;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.recent-patient-box {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(37, 78, 88, 0.45);
+    border: 1px solid #254E58;
+    font-size: 12.5px;
+    color: #E8F1F0;
+}
+
+.recent-patient-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.recent-patient-label {
+    color: #A3B8B8;
+    font-weight: 600;
+}
+
+.recent-patient-meta {
+    color: #88BDBC;
+    font-size: 12px;
+}
+
+.recent-metrics {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 13px;
+    color: #A3B8B8;
+}
+
+.recent-metrics strong {
+    color: #88BDBC;
+    font-weight: 700;
+}
+
+.open-btn {
+    margin-top: auto;
+    width: 100%;
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: 1px solid #88BDBC;
+    background: #88BDBC;
+    color: #112D32;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.open-btn:hover {
+    background: #9ececd;
+    border-color: #9ececd;
+}
