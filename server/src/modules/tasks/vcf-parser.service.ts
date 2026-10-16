@@ -1,4 +1,4 @@
-import {Injectable} from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import * as zlib from "node:zlib";
 import * as fs from "node:fs";
 import * as readline from "node:readline";
@@ -12,6 +12,13 @@ export interface ParsedVariant {
     filter: string;
     dp: number;
     gt: string;
+    ad: [number, number];
+    gq: number;
+    mq: number;
+    qd: number;
+    sor: number;
+    bqrs: number;
+    rprs: number;
 }
 
 export interface StreamAnalytics {
@@ -27,16 +34,39 @@ export interface StreamAnalytics {
 
 const TRANSITIONS = new Set(['AG', 'GA', 'CT', 'TC']);
 
+function parseInfo(info: string): Record<string, string> {
+    const result: Record<string, string> = {};
+    if (!info || info === '.') return result;
+
+    for (const part of info.split(';')) {
+        const eq = part.indexOf('=');
+        if (eq === -1) continue;
+        result[part.slice(0, eq)] = part.slice(eq + 1);
+    }
+    return result;
+}
+
+function parseNumber(value: string | undefined, fallback = 0): number {
+    if (value === undefined || value === '' || value === '.') return fallback;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function parseAd(raw: string | undefined, dp: number): [number, number] {
+    if (!raw || raw === '.') return [dp, 0];
+    const parts = raw.split(',').map((part) => parseNumber(part, 0));
+    return [parts[0] ?? 0, parts[1] ?? 0];
+}
 
 @Injectable()
 export class VcfParserService {
     async parseStream(filePath: string): Promise<StreamAnalytics> {
         const rawStream = fs.createReadStream(filePath);
         const stream = filePath.endsWith('.gz')
-        ? rawStream.pipe(zlib.createGunzip())
+            ? rawStream.pipe(zlib.createGunzip())
             : rawStream;
 
-        const rl = readline.createInterface({input: stream, crlfDelay: Infinity});
+        const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
 
         const stats: StreamAnalytics = {
             total: 0,
@@ -56,10 +86,16 @@ export class VcfParserService {
             const cols = line.split('\t');
             if (cols.length < 8) continue;
 
-            const [chr, posStr, , ref, altRaw, qualStr, filter] = cols;
+            const [chr, posStr, , ref, altRaw, qualStr, filterRaw, infoRaw] = cols;
             const alt = altRaw.split(',')[0];
+            if (!chr || !posStr || !ref || !alt) continue;
+
             const pos = Number(posStr);
-            const qual = Number(qualStr) || 0;
+            if (!Number.isFinite(pos)) continue;
+
+            const qual = parseNumber(qualStr);
+            const filter = filterRaw && filterRaw !== '.' ? filterRaw : '.';
+            const info = parseInfo(infoRaw);
 
             const isSnp = ref.length === 1 && alt.length === 1;
             if (isSnp) {
@@ -70,15 +106,19 @@ export class VcfParserService {
                 stats.indelCount++;
             }
 
-            let gt = './.';
+            const sample: Record<string, string> = {};
             if (cols[8] && cols[9]) {
                 const fmtKeys = cols[8].split(':');
                 const fmtVals = cols[9].split(':');
-                const gdIdx = fmtKeys.indexOf('GT');
-                if (gdIdx !== -1 && fmtVals[gdIdx]) {
-                    const rawGt = fmtVals[gdIdx].replace(/\|/g, '/');
-                    gt = rawGt === '1/0' ? '0/1' : rawGt;
-                }
+                fmtKeys.forEach((key, idx) => {
+                    sample[key] = fmtVals[idx] ?? '';
+                });
+            }
+
+            let gt = './.';
+            if (sample.GT && sample.GT !== '.') {
+                const rawGt = sample.GT.replace(/\|/g, '/');
+                gt = rawGt === '1/0' ? '0/1' : rawGt;
             }
 
             if (gt === '0/1') stats.hetCount++;
@@ -87,7 +127,25 @@ export class VcfParserService {
             stats.total++;
 
             if (stats.variants.length < 30000) {
-                stats.variants.push({chr, pos, ref, alt, qual, filter, gt, dp: 0});
+                const dp = parseNumber(sample.DP, parseNumber(info.DP));
+                const ad = parseAd(sample.AD, dp);
+                stats.variants.push({
+                    chr,
+                    pos,
+                    ref,
+                    alt,
+                    qual,
+                    filter,
+                    gt,
+                    dp,
+                    ad,
+                    gq: parseNumber(sample.GQ),
+                    mq: parseNumber(info.MQ),
+                    qd: parseNumber(info.QD),
+                    sor: parseNumber(info.SOR),
+                    bqrs: parseNumber(info.BaseQRankSum),
+                    rprs: parseNumber(info.ReadPosRankSum),
+                });
             }
         }
 

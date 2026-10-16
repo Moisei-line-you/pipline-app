@@ -1,11 +1,11 @@
-import { Controller, Post, Get, Delete, Param, UseGuards, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Param, Body, UseGuards, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { TasksService } from './tasks.service';
+import { TasksService, CreateTaskMeta } from './tasks.service';
 
 @Controller('tasks')
 @UseGuards(JwtAuthGuard)
@@ -33,9 +33,13 @@ export class TasksController {
             },
         }),
     )
-    uploadFile(@CurrentUser() user: { id: string }, @UploadedFile() file: Express.Multer.File) {
+    uploadFile(
+        @CurrentUser() user: { id: string },
+        @UploadedFile() file: Express.Multer.File,
+        @Body() body: CreateTaskMeta,
+    ) {
         if (!file) throw new BadRequestException('Файл не был загружен');
-        return this.tasksService.createTask(user.id, file);
+        return this.tasksService.createTask(user.id, file, body);
     }
 
     @Get()
