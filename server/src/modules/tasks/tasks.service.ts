@@ -5,6 +5,25 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import "multer";
 
+/** Клинические метаданные анализа и пациента */
+export interface CreateTaskMeta {
+    analysisTitle?: string;
+    patientName?: string;
+    patientAge?: string | number;
+    patientGender?: string;
+    referenceGenome?: string;
+    clinicalNotes?: string;
+}
+
+interface StoredTaskMeta {
+    analysisTitle: string | null;
+    patientName: string | null;
+    patientAge: number | null;
+    patientGender: string | null;
+    referenceGenome: string | null;
+    clinicalNotes: string | null;
+}
+
 @Injectable()
 export class TasksService {
     constructor(
@@ -12,7 +31,58 @@ export class TasksService {
         private readonly parser: VcfParserService
     ) {}
 
-    async createTask(userId: string, file: Express.Multer.File) {
+    private getMetaFilePath(taskId: string): string {
+        const resultsDir = path.resolve('storage/uploads/results');
+        if (!fs.existsSync(resultsDir)) {
+            fs.mkdirSync(resultsDir, { recursive: true });
+        }
+        return path.join(resultsDir, `${taskId}.meta.json`);
+    }
+
+    private saveTaskMeta(taskId: string, meta?: CreateTaskMeta): StoredTaskMeta {
+        const parsedAge =
+            meta?.patientAge !== undefined && meta?.patientAge !== ''
+                ? Number(meta.patientAge)
+                : null;
+
+        const cleanMeta: StoredTaskMeta = {
+            analysisTitle: meta?.analysisTitle?.trim() || null,
+            patientName: meta?.patientName?.trim() || null,
+            patientAge: parsedAge !== null && !Number.isNaN(parsedAge) ? parsedAge : null,
+            patientGender: meta?.patientGender?.trim() || null,
+            referenceGenome: meta?.referenceGenome?.trim() || null,
+            clinicalNotes: meta?.clinicalNotes?.trim() || null,
+        };
+
+        try {
+            fs.writeFileSync(this.getMetaFilePath(taskId), JSON.stringify(cleanMeta), 'utf-8');
+        } catch {
+            // ignore metadata write errors
+        }
+
+        return cleanMeta;
+    }
+
+    private readTaskMeta(taskId: string): StoredTaskMeta {
+        const metaPath = this.getMetaFilePath(taskId);
+        if (fs.existsSync(metaPath)) {
+            try {
+                return JSON.parse(fs.readFileSync(metaPath, 'utf-8')) as StoredTaskMeta;
+            } catch {
+                // fallback to nulls
+            }
+        }
+        return {
+            analysisTitle: null,
+            patientName: null,
+            patientAge: null,
+            patientGender: null,
+            referenceGenome: null,
+            clinicalNotes: null,
+        };
+    }
+
+    async createTask(userId: string, file: Express.Multer.File, meta?: CreateTaskMeta) {
         const task = await this.prisma.analysisTask.create({
             data: {
                 userId,
@@ -23,6 +93,7 @@ export class TasksService {
             },
         });
 
+        this.saveTaskMeta(task.id, meta);
         this.processTaskInBackground(task.id, file.path);
 
         return {
@@ -82,7 +153,11 @@ export class TasksService {
             orderBy: { createdAt: 'desc' },
             include: { result: true },
         });
-        return tasks.map((t) => ({ ...t, fileSize: Number(t.fileSize) }));
+        return tasks.map((t) => ({
+            ...t,
+            fileSize: Number(t.fileSize),
+            ...this.readTaskMeta(t.id),
+        }));
     }
 
     async getTaskResult(userId: string, taskId: string) {
@@ -92,7 +167,11 @@ export class TasksService {
         });
         if (!task) throw new NotFoundException('Task not found');
 
-        const serializedTask = { ...task, fileSize: Number(task.fileSize) };
+        const serializedTask = {
+            ...task,
+            fileSize: Number(task.fileSize),
+            ...this.readTaskMeta(task.id),
+        };
 
         if (task.status !== 'COMPLETED' || !task.result) {
             return { task: serializedTask, variants: [] };
@@ -110,10 +189,13 @@ export class TasksService {
         });
         if (!task) throw new NotFoundException('Task not found');
 
-
         if (fs.existsSync(task.storedPath)) fs.unlinkSync(task.storedPath);
         if (task.result && fs.existsSync(task.result.jsonResultPath)) {
             fs.unlinkSync(task.result.jsonResultPath);
+        }
+        const metaPath = this.getMetaFilePath(task.id);
+        if (fs.existsSync(metaPath)) {
+            fs.unlinkSync(metaPath);
         }
 
         const deleted = await this.prisma.analysisTask.delete({ where: { id: taskId } });
