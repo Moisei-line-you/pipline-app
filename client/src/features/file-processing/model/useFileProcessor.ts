@@ -1,11 +1,20 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import type { FileInfo, ProcessingStatus } from './processing.types';
-import type { Variant } from '../../variant-dashboard/ui/types';
 import { formatFileSize } from '../../../shared/lib/formatFileSize';
-import { parseVcf } from './parseVcf';
+import { tasksApi, type UploadTaskMeta } from '../../tasks/api/tasksApi';
 
-export const useFileProcessor = (onProcessSuccess?: (variants: Variant[]) => void) => {
-    const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
+const INITIAL_META: UploadTaskMeta = {
+    analysisTitle: '',
+    patientName: '',
+    patientAge: '',
+    patientGender: 'Not specified',
+    referenceGenome: 'GRCh38 / hg38',
+    clinicalNotes: '',
+};
+
+export const useFileProcessor = (onUploadSuccess?: () => void) => {
+    const [files, setFiles] = useState<FileInfo[]>([]);
+    const [meta, setMeta] = useState<UploadTaskMeta>(INITIAL_META);
     const [status, setStatus] = useState<ProcessingStatus>('idle');
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -18,42 +27,80 @@ export const useFileProcessor = (onProcessSuccess?: (variants: Variant[]) => voi
         };
     }, []);
 
-    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
+    const handleMetaChange = (
+        e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    ) => {
+        const { name, value } = e.target;
+        setMeta((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const addRawFiles = (incomingFiles: File[]) => {
+        if (incomingFiles.length === 0) return;
         setError(null);
 
-        if (file) {
-            setFileInfo({
-                name: file.name,
-                size: formatFileSize(file.size),
-                rawFile: file,
-            });
-            setStatus('file-selected');
+        const invalidFile = incomingFiles.find((f) => {
+            const lower = f.name.toLowerCase();
+            return !lower.endsWith('.vcf') && !lower.endsWith('.vcf.gz');
+        });
+
+        if (invalidFile) {
+            setError(`Invalid file "${invalidFile.name}". Please upload only .vcf or .vcf.gz files.`);
+            return;
+        }
+
+        setFiles((prev) => {
+            const next = [...prev];
+            for (const file of incomingFiles) {
+                const alreadyExists = next.some(
+                    (item) => item.name === file.name && item.rawFile.size === file.size
+                );
+                if (!alreadyExists) {
+                    next.push({
+                        name: file.name,
+                        size: formatFileSize(file.size),
+                        rawFile: file,
+                    });
+                }
+            }
+            return next;
+        });
+
+        setStatus('file-selected');
+    };
+
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const selected = Array.from(e.target.files ?? []);
+        addRawFiles(selected);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
         }
     };
 
-    const handleRemoveFile = () => {
-        setFileInfo(null);
-        setStatus('idle');
+    const handleDropFiles = (e: DragEvent<HTMLElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (status === 'processing') return;
+        const dropped = Array.from(e.dataTransfer.files ?? []);
+        addRawFiles(dropped);
+    };
+
+    const handleRemoveFile = (indexToRemove: number) => {
         setError(null);
+        setFiles((prev) => {
+            const updated = prev.filter((_, idx) => idx !== indexToRemove);
+            if (updated.length === 0) {
+                setStatus('idle');
+            }
+            return updated;
+        });
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
     };
 
     const handleProcess = async () => {
-        if (!fileInfo) {
-            setError('Please select a file');
-            return;
-        }
-
-        const lowerName = fileInfo.name.toLowerCase();
-        if (lowerName.endsWith('.gz')) {
-            setError('Compressed VCF (.gz) is not supported. Please upload a plain .vcf file.');
-            return;
-        }
-        if (!lowerName.endsWith('.vcf')) {
-            setError('Please upload a .vcf file');
+        if (files.length === 0) {
+            setError('Please select at least one file');
             return;
         }
 
@@ -61,33 +108,42 @@ export const useFileProcessor = (onProcessSuccess?: (variants: Variant[]) => voi
         setError(null);
 
         try {
-            const text = await fileInfo.rawFile.text();
-            if (!aliveRef.current) return;
+            const baseTitle = meta.analysisTitle?.trim() || '';
+            await Promise.all(
+                files.map((item, idx) => {
+                    const itemMeta: UploadTaskMeta = {
+                        ...meta,
+                        analysisTitle:
+                            files.length > 1 && baseTitle
+                                ? `${baseTitle} (File #${idx + 1})`
+                                : baseTitle,
+                    };
+                    return tasksApi.uploadFile(item.rawFile, itemMeta);
+                })
+            );
 
-            const variants = parseVcf(text);
             if (!aliveRef.current) return;
-
-            if (variants.length === 0) {
-                setStatus('file-selected');
-                setError('No variants found in this file');
-                return;
-            }
 
             setStatus('completed');
-            onProcessSuccess?.(variants);
+            setFiles([]);
+            setMeta(INITIAL_META);
+            onUploadSuccess?.();
         } catch (err) {
             if (!aliveRef.current) return;
             setStatus('file-selected');
-            setError(err instanceof Error ? err.message : 'Failed to process file');
+            setError(err instanceof Error ? err.message : 'Failed to upload files');
         }
     };
 
     return {
-        fileInfo,
+        files,
+        meta,
         status,
         error,
         fileInputRef,
+        handleMetaChange,
         handleFileChange,
+        handleDropFiles,
         handleRemoveFile,
         handleProcess,
     };
