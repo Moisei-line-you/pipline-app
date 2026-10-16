@@ -1,0 +1,148 @@
+.navbar-container {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 0 32px;
+    height: 68px;
+    background: #16363D;
+    border-bottom: 1px solid #254E58;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.navbar-logo {
+    justify-self: start;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.logo-badge {
+    font-size: 20px;
+    font-weight: 800;
+    background: linear-gradient(90deg, #E8F1F0, #88BDBC);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.4px;
+}
+
+.logo-sub {
+    font-size: 12px;
+    font-weight: 500;
+    color: #A3B8B8;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: rgba(37, 78, 88, 0.6);
+    border: 1px solid #254E58;
+}
+
+.navbar-tabs {
+    justify-self: center;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #A3B8B8;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.nav-tab-btn:hover {
+    color: #E8F1F0;
+    background: rgba(37, 78, 88, 0.5);
+    border-color: #6E6658;
+}
+
+.nav-tab-btn.active {
+    color: #112D32;
+    background: #88BDBC;
+    border-color: #88BDBC;
+    font-weight: 700;
+    box-shadow: 0 2px 10px rgba(136, 189, 188, 0.25);
+}
+
+.tab-counter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #4F4A41;
+    color: #88BDBC;
+    border: 1px solid #6E6658;
+    font-size: 11px;
+    font-weight: 700;
+    animation: pulse-badge 1.8s infinite;
+}
+
+.nav-tab-btn.active .tab-counter {
+    background: #112D32;
+    color: #88BDBC;
+    border-color: #112D32;
+}
+
+@keyframes pulse-badge {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.75;
+        transform: scale(1.06);
+    }
+}
+
+.navbar-logout-btn {
+    justify-self: end;
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1px solid #6E6658;
+    background: #4F4A41;
+    color: #E8F1F0;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.navbar-logout-btn:hover {
+    background: #6E6658;
+    border-color: #88BDBC;
+    color: #ffffff;
+}
+
+@media (max-width: 768px) {
+    .navbar-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        height: auto;
+        padding: 12px 16px;
+        gap: 12px;
+    }
+
+    .navbar-tabs {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+}
