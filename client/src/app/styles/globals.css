@@ -1,7 +1,35 @@
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background-color: #111827;
-    overflow-x: hidden;
+:root {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  /* Палитра: #88BDBC, #254E58, #112D32, #4F4A41, #6E6658 */
+  --color-aqua: #88BDBC;
+  --color-teal-mid: #254E58;
+  --color-teal-dark: #112D32;
+  --color-taupe-dark: #4F4A41;
+  --color-taupe-light: #6E6658;
+  --color-text-light: #E8F1F0;
+  --color-text-muted: #A3B8B8;
+
+  color: var(--color-text-light);
+  background: var(--color-teal-dark);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #112D32;
+  color: #E8F1F0;
+}
+
+button,
+input,
+select {
+  font: inherit;
 }
