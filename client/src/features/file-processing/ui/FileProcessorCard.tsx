@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { useFileProcessor } from '../model/useFileProcessor';
+import { useFileProcessor, MAX_FILES_PER_UPLOAD } from '../model/useFileProcessor';
 import './FileProcessorCard.css';
 
 interface FileProcessorCardProps {
@@ -29,7 +29,7 @@ export const FileProcessorCard: FC<FileProcessorCardProps> = ({ onUploadSuccess 
             <div className="processor-card">
                 <h2 className="processor-title">New Cardiogenetic Analysis</h2>
                 <p className="processor-description">
-                    Fill in the patient details and upload one or multiple .vcf / .vcf.gz files to generate separate reports for this patient
+                    Fill in the patient details and upload 1 or 2 .vcf / .vcf.gz files to generate separate reports
                 </p>
 
                 {error && <div className="server-error">{error}</div>}
@@ -137,10 +137,10 @@ export const FileProcessorCard: FC<FileProcessorCardProps> = ({ onUploadSuccess 
                 {files.length > 0 && (
                     <div className="selected-files-list">
                         <div className="selected-files-header">
-                            <span>Selected files ({files.length})</span>
-                            {!isProcessing && (
+                            <span>Selected files ({files.length} / {MAX_FILES_PER_UPLOAD})</span>
+                            {!isProcessing && files.length < MAX_FILES_PER_UPLOAD && (
                                 <label htmlFor="vcf-file-input" className="add-more-files-btn">
-                                    + Add another file
+                                    + Add 2nd file
                                 </label>
                             )}
                         </div>
@@ -196,10 +196,10 @@ export const FileProcessorCard: FC<FileProcessorCardProps> = ({ onUploadSuccess 
                             <line x1="12" y1="3" x2="12" y2="15" />
                         </svg>
                         <span className="upload-text">
-                            Click or drag & drop one or multiple .vcf / .vcf.gz files
+                            Click or drag & drop up to 2 .vcf / .vcf.gz files
                         </span>
                         <span className="upload-hint">
-                            You can select 2 or more files at once to create separate reports for this patient
+                            You can select up to 2 files at once to create separate reports for this patient
                         </span>
                     </label>
                 )}

@@ -3,6 +3,8 @@ import type { FileInfo, ProcessingStatus } from './processing.types';
 import { formatFileSize } from '../../../shared/lib/formatFileSize';
 import { tasksApi, type UploadTaskMeta } from '../../tasks/api/tasksApi';
 
+export const MAX_FILES_PER_UPLOAD = 2;
+
 const INITIAL_META: UploadTaskMeta = {
     analysisTitle: '',
     patientName: '',
@@ -48,9 +50,14 @@ export const useFileProcessor = (onUploadSuccess?: () => void) => {
             return;
         }
 
+        if (files.length + incomingFiles.length > MAX_FILES_PER_UPLOAD) {
+            setError(`You can upload at most ${MAX_FILES_PER_UPLOAD} files at once.`);
+        }
+
         setFiles((prev) => {
             const next = [...prev];
             for (const file of incomingFiles) {
+                if (next.length >= MAX_FILES_PER_UPLOAD) break;
                 const alreadyExists = next.some(
                     (item) => item.name === file.name && item.rawFile.size === file.size
                 );
