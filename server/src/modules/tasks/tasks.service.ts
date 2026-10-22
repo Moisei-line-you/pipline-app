@@ -24,12 +24,57 @@ interface StoredTaskMeta {
     clinicalNotes: string | null;
 }
 
+interface QueuedTask {
+    userId: string;
+    taskId: string;
+    filePath: string;
+}
+
 @Injectable()
 export class TasksService {
+    private readonly MAX_PER_USER = 2;
+    private readonly MAX_GLOBAL = 10;
+    private readonly queue: QueuedTask[] = [];
+    private activeGlobal = 0;
+    private readonly activeByUser = new Map<string, number>();
+
     constructor(
         private readonly prisma: PrismaService,
         private readonly parser: VcfParserService
     ) {}
+
+    private enqueueTask(userId: string, taskId: string, filePath: string) {
+        this.queue.push({ userId, taskId, filePath });
+        this.scheduleNext();
+    }
+
+    private scheduleNext() {
+        while (this.activeGlobal < this.MAX_GLOBAL && this.queue.length > 0) {
+            const nextIndex = this.queue.findIndex(
+                (item) => (this.activeByUser.get(item.userId) ?? 0) < this.MAX_PER_USER
+            );
+
+            if (nextIndex === -1) {
+                break;
+            }
+
+            const [nextTask] = this.queue.splice(nextIndex, 1);
+            this.activeGlobal++;
+            const userActive = (this.activeByUser.get(nextTask.userId) ?? 0) + 1;
+            this.activeByUser.set(nextTask.userId, userActive);
+
+            this.processTaskInBackground(nextTask.taskId, nextTask.filePath).finally(() => {
+                this.activeGlobal--;
+                const remainingForUser = (this.activeByUser.get(nextTask.userId) ?? 1) - 1;
+                if (remainingForUser <= 0) {
+                    this.activeByUser.delete(nextTask.userId);
+                } else {
+                    this.activeByUser.set(nextTask.userId, remainingForUser);
+                }
+                this.scheduleNext();
+            });
+        }
+    }
 
     private getMetaFilePath(taskId: string): string {
         const resultsDir = path.resolve('storage/uploads/results');
@@ -94,7 +139,7 @@ export class TasksService {
         });
 
         this.saveTaskMeta(task.id, meta);
-        this.processTaskInBackground(task.id, file.path);
+        this.enqueueTask(userId, task.id, file.path);
 
         return {
             taskId: task.id,
@@ -188,6 +233,11 @@ export class TasksService {
             include: { result: true },
         });
         if (!task) throw new NotFoundException('Task not found');
+
+        const queuedIdx = this.queue.findIndex((q) => q.taskId === taskId);
+        if (queuedIdx !== -1) {
+            this.queue.splice(queuedIdx, 1);
+        }
 
         if (fs.existsSync(task.storedPath)) fs.unlinkSync(task.storedPath);
         if (task.result && fs.existsSync(task.result.jsonResultPath)) {
